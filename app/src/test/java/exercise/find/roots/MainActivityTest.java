@@ -1,7 +1,11 @@
 package exercise.find.roots;
 
+import android.content.Intent;
+import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import junit.framework.TestCase;
 
@@ -9,6 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -47,6 +53,86 @@ public class MainActivityTest extends TestCase {
 
     // test: insert input to the edit text and verify that the button is enabled
     // TODO: implement
+    inputEditText.setText("100");
+    assertTrue(button.isEnabled());
+  }
+
+  @Test
+  public void when_activityIsLaunching_then_theProgressBarIsHidden(){
+    // create a MainActivity and let it think it's currently displayed on the screen
+    MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().visible().get();
+
+    // find the edit-text and the button
+    EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
+    Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
+    ProgressBar bar = mainActivity.findViewById(R.id.progressBar);
+    assertEquals(bar.getVisibility(), View.GONE);
+  }
+
+  @Test
+  public void when_calculating_then_theProgressBarIsvisible(){
+    // create a MainActivity and let it think it's currently displayed on the screen
+    MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().visible().get();
+
+    // find the edit-text and the button
+    EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
+    Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
+    ProgressBar bar = mainActivity.findViewById(R.id.progressBar);
+
+    inputEditText.setText("100");
+    button.performClick();
+    assertEquals(bar.getVisibility(), View.VISIBLE);
+  }
+  @Test
+  public void when_badInput_then_buttonIsDisabled(){
+    // create a MainActivity and let it think it's currently displayed on the screen
+    MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().visible().get();
+
+    // find the edit-text and the button
+    EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
+    Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
+    ProgressBar bar = mainActivity.findViewById(R.id.progressBar);
+
+    inputEditText.setText("17.3");
+    button.performClick();
+    assertFalse(button.isEnabled());
+  }
+
+  @Test
+  public void when_flipScreen_then_textRemain(){
+    // create a MainActivity and let it think it's currently displayed on the screen
+    MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().visible().get();
+
+    // find the edit-text and the button
+    EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
+    Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
+
+    inputEditText.setText("17");
+    button.performClick();
+    assertFalse(button.isEnabled());
+    Intent newIntent = new Intent("stopped_calculations");
+    RuntimeEnvironment.application.sendBroadcast(newIntent);
+    Shadows.shadowOf(Looper.getMainLooper()).idle();
+    assertTrue(button.isEnabled());
+  }
+
+  @Test
+  public void when_stopCalc_then_progressBarNotAppears(){
+    // create a MainActivity and let it think it's currently displayed on the screen
+    MainActivity mainActivity = Robolectric.buildActivity(MainActivity.class).create().visible().get();
+
+    // find the edit-text and the button
+    EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
+    Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
+    ProgressBar bar = mainActivity.findViewById(R.id.progressBar);
+
+    inputEditText.setText("17");
+    button.performClick();
+    assertEquals(bar.getVisibility(),View.VISIBLE);
+    Intent newIntent = new Intent("stopped_calculations");
+    RuntimeEnvironment.application.sendBroadcast(newIntent);
+    Shadows.shadowOf(Looper.getMainLooper()).idle();
+    assertEquals(bar.getVisibility(),View.GONE);
   }
 
   // TODO: add 1 or 2 more unit tests to the activity. so your "writing tests" skill won't get rusty.

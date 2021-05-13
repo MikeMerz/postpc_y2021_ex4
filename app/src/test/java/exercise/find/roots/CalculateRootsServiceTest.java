@@ -48,4 +48,5 @@ public class CalculateRootsServiceTest extends TestCase {
     assertEquals(15, originalNumber);
     assertEquals(15, firstRoot * secondRoot);
   }
+
 }

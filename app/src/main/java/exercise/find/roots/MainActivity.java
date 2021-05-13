@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
   private BroadcastReceiver broadcastReceiverForSuccess = null;
   // TODO: add any other fields to the activity as you want
+  private boolean calcRunning = false;
+  private boolean validInput = true;
+  private BroadcastReceiver broadcastReceiverForFailure = null;
 
 
   @Override
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         // text did change
         String newText = editTextUserInput.getText().toString();
         // todo: check conditions to decide if button should be enabled/disabled (see spec below)
+        buttonCalculateRoots.setEnabled(!calcRunning && validInput);
       }
     });
 
@@ -53,9 +58,31 @@ public class MainActivity extends AppCompatActivity {
       String userInputString = editTextUserInput.getText().toString();
       // todo: check that `userInputString` is a number. handle bad input. convert `userInputString` to long
       long userInputLong = 0; // todo this should be the converted string from the user
-      intentToOpenService.putExtra("number_for_service", userInputLong);
-      startService(intentToOpenService);
-      // todo: set views states according to the spec (below)
+      try {
+        userInputLong = Long.parseLong(userInputString);
+        validInput = true;
+        intentToOpenService.putExtra("number_for_service", userInputLong);
+        calcRunning = true;
+        editTextUserInput.setEnabled(false);
+        buttonCalculateRoots.setEnabled(false);
+        progressBar.setVisibility(View.VISIBLE);
+        startService(intentToOpenService);
+      }catch (NumberFormatException e)
+      {
+        validInput = false;
+        calcRunning = false;
+        editTextUserInput.setEnabled(true);
+        buttonCalculateRoots.setEnabled(true);
+        progressBar.setVisibility(View.GONE);
+        Toast.makeText(this,"Bad Input Inserted, Please insert again",Toast.LENGTH_SHORT).show();
+      }
+//      intentToOpenService.putExtra("number_for_service", userInputLong);
+//      startService(intentToOpenService);
+//
+//      calcRunning = true;
+//      editTextUserInput.setEnabled(false);
+//      buttonCalculateRoots.setEnabled(false);
+//      progressBar.setVisibility(View.VISIBLE);
     });
 
     // register a broadcast-receiver to handle action "found_roots"
@@ -71,16 +98,44 @@ public class MainActivity extends AppCompatActivity {
            - when creating an intent to open the new-activity, pass the roots as extras to the new-activity intent
              (see for example how did we pass an extra when starting the calculation-service)
          */
+        calcRunning = false;
+        editTextUserInput.setEnabled(true);
+        buttonCalculateRoots.setEnabled(true);
+        progressBar.setVisibility(View.GONE);
+
+        Intent newIntent = new Intent(MainActivity.this,SuccessActivity.class);
+        Bundle b = new Bundle();
+        b.putLong("root1",incomingIntent.getLongExtra("root1",0));
+        b.putLong("root2", incomingIntent.getLongExtra("root2",0));
+        b.putLong("original_number",incomingIntent.getLongExtra("original_number",0));
+        b.putLong("time_spent",incomingIntent.getLongExtra("time_spent",0));
+        newIntent.putExtras(b);
+
+        startActivity(newIntent);
       }
     };
     registerReceiver(broadcastReceiverForSuccess, new IntentFilter("found_roots"));
-
     /*
     todo:
      add a broadcast-receiver to listen for abort-calculating as defined in the spec (below)
      to show a Toast, use this code:
      `Toast.makeText(this, "text goes here", Toast.LENGTH_SHORT).show()`
      */
+    broadcastReceiverForFailure = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent incomingIntent) {
+        if (incomingIntent == null || !incomingIntent.getAction().equals("stopped_calculations")){
+          return;
+        }
+        long timeSpent = incomingIntent.getLongExtra("time_until_give_up_seconds",0);
+        calcRunning = false;
+        editTextUserInput.setEnabled(true);
+        progressBar.setVisibility(View.GONE);
+        buttonCalculateRoots.setEnabled(true);
+        Toast.makeText(context,"calculation aborted after "+ timeSpent +" seconds",Toast.LENGTH_SHORT).show();
+      }
+    };
+    registerReceiver(broadcastReceiverForFailure,new IntentFilter("stopped_calculations"));
   }
 
   @Override
@@ -88,18 +143,24 @@ public class MainActivity extends AppCompatActivity {
     super.onDestroy();
     // todo: remove ALL broadcast receivers we registered earlier in onCreate().
     //  to remove a registered receiver, call method `this.unregisterReceiver(<receiver-to-remove>)`
+    this.unregisterReceiver(broadcastReceiverForFailure);
+    this.unregisterReceiver(broadcastReceiverForSuccess);
   }
 
   @Override
   protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     // TODO: put relevant data into bundle as you see fit
+    outState.putSerializable("running",calcRunning);
+    outState.putSerializable("isValid",validInput);
   }
 
   @Override
   protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     // TODO: load data from bundle and set screen state (see spec below)
+    calcRunning = (boolean) savedInstanceState.getSerializable("running");
+    validInput = (boolean) savedInstanceState.getSerializable("isValid");
   }
 }
 

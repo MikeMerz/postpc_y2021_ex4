@@ -10,6 +10,7 @@ public class CalculateRootsService extends IntentService {
   public CalculateRootsService() {
     super("CalculateRootsService");
   }
+  private  long DEFUALT =1;
 
   @Override
   protected void onHandleIntent(Intent intent) {
@@ -41,5 +42,41 @@ public class CalculateRootsService extends IntentService {
        for input "829851628752296034247307144300617649465159", after 20 seconds give up
 
      */
+    long i=2;
+    Intent newIntent = new Intent();
+    long  diff = System.currentTimeMillis() - timeStartMs;
+    while(i<numberToCalculateRootsFor)
+    {
+      if(diff>20000)
+      {
+        newIntent.putExtra("original_number",numberToCalculateRootsFor);
+        newIntent.putExtra("time_until_give_up_seconds",diff/1000);
+        newIntent.setAction("stopped_calculations");
+        sendBroadcast(newIntent);
+        return;
+      }
+      if(numberToCalculateRootsFor%i==0)
+      {
+        newIntent.putExtra("original_number",numberToCalculateRootsFor);
+        newIntent.putExtra("root1",i);
+        newIntent.putExtra("root2",numberToCalculateRootsFor/i);
+        newIntent.putExtra("time_spent",diff/1000);
+        newIntent.setAction("found_roots");
+        sendBroadcast(newIntent);
+        return;
+      }
+      diff = System.currentTimeMillis() - timeStartMs;
+      System.out.println(diff);
+      ++i;
+    }
+    System.out.println("IM HERE??");
+    newIntent.putExtra("original_number",numberToCalculateRootsFor);
+    newIntent.putExtra("root2",DEFUALT);
+    newIntent.putExtra("root1",numberToCalculateRootsFor);
+    newIntent.putExtra("time_spent",diff/1000);
+    newIntent.setAction("found_roots");
+    sendBroadcast(newIntent);
+
+
   }
 }
