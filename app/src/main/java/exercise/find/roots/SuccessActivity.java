@@ -18,15 +18,7 @@ public class SuccessActivity extends AppCompatActivity {
         long orig =  b.getLong("original_number");
         long timeSpent =  b.getLong("time_spent");
         TextView firstView = findViewById(R.id.textViewForRoot1);
-        TextView secondView = findViewById(R.id.textViewForRoot2);
-        TextView viewSpent = findViewById(R.id.textViewTimeSpent);
-        TextView originalNumberView = findViewById(R.id.textViewOriginalNumber);
 
-
-        firstView.setText(Long.toString(root1));
-        secondView.setText(Long.toString(root2));
-        viewSpent.setText(Long.toString(timeSpent));
-        originalNumberView.setText(Long.toString(orig));
-
+        firstView.setText(Long.toString(root1)+ "*" +Long.toString(root2) + "=" + orig +","+ "time spent:" + timeSpent);
     }
 }

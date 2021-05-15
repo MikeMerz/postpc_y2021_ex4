@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
       long userInputLong = 0; // todo this should be the converted string from the user
       try {
         userInputLong = Long.parseLong(userInputString);
+        if(userInputLong <0){throw new NumberFormatException();}
         validInput = true;
         intentToOpenService.putExtra("number_for_service", userInputLong);
         calcRunning = true;
@@ -76,13 +77,6 @@ public class MainActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
         Toast.makeText(this,"Bad Input Inserted, Please insert again",Toast.LENGTH_SHORT).show();
       }
-//      intentToOpenService.putExtra("number_for_service", userInputLong);
-//      startService(intentToOpenService);
-//
-//      calcRunning = true;
-//      editTextUserInput.setEnabled(false);
-//      buttonCalculateRoots.setEnabled(false);
-//      progressBar.setVisibility(View.VISIBLE);
     });
 
     // register a broadcast-receiver to handle action "found_roots"

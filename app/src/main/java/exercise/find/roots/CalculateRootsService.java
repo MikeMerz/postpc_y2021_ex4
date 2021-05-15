@@ -66,10 +66,8 @@ public class CalculateRootsService extends IntentService {
         return;
       }
       diff = System.currentTimeMillis() - timeStartMs;
-      System.out.println(diff);
       ++i;
     }
-    System.out.println("IM HERE??");
     newIntent.putExtra("original_number",numberToCalculateRootsFor);
     newIntent.putExtra("root2",DEFUALT);
     newIntent.putExtra("root1",numberToCalculateRootsFor);
