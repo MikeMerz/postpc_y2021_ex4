@@ -1,3 +1,9 @@
+I pledge the highest level of ethical principles in support of academic excellence.  I ensure that all of my work reflects my own abilities and not those of someone else.
+
+Answer to Question:
+I would add a reciving parameter for the service so that when its called for a test it will be passed down 20ms and when the acual program will be running it will be passed 20s.
+
+
 # Find Roots
 
 An Android exercise for developers teaching how to play around with intents, activities, services and broadcast receivers
