@@ -91,7 +91,6 @@ public class MainActivityTest extends TestCase {
     // find the edit-text and the button
     EditText inputEditText = mainActivity.findViewById(R.id.editTextInputNumber);
     Button button = mainActivity.findViewById(R.id.buttonCalculateRoots);
-    ProgressBar bar = mainActivity.findViewById(R.id.progressBar);
 
     inputEditText.setText("17.3");
     button.performClick();

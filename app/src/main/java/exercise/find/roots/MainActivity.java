@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         // text did change
         String newText = editTextUserInput.getText().toString();
         // todo: check conditions to decide if button should be enabled/disabled (see spec below)
+        validInput = !newText.startsWith("-") && !newText.startsWith("0");
         buttonCalculateRoots.setEnabled(!calcRunning && validInput);
       }
     });
@@ -57,26 +58,30 @@ public class MainActivity extends AppCompatActivity {
       Intent intentToOpenService = new Intent(MainActivity.this, CalculateRootsService.class);
       String userInputString = editTextUserInput.getText().toString();
       // todo: check that `userInputString` is a number. handle bad input. convert `userInputString` to long
+      if (userInputString.charAt(0) == '0' || userInputString.charAt(0) == '-'){
+        validInput = false;
+        return;
+      }
       long userInputLong = 0; // todo this should be the converted string from the user
       try {
-        userInputLong = Long.parseLong(userInputString);
-        if(userInputLong <0){throw new NumberFormatException();}
-        validInput = true;
-        intentToOpenService.putExtra("number_for_service", userInputLong);
-        calcRunning = true;
-        editTextUserInput.setEnabled(false);
         buttonCalculateRoots.setEnabled(false);
-        progressBar.setVisibility(View.VISIBLE);
-        startService(intentToOpenService);
+        userInputLong = Long.parseLong(userInputString);
+        if(userInputLong <0 || userInputString.contains(".")){throw new NumberFormatException();}
+        validInput = true;
       }catch (NumberFormatException e)
       {
         validInput = false;
         calcRunning = false;
-        editTextUserInput.setEnabled(true);
-        buttonCalculateRoots.setEnabled(true);
-        progressBar.setVisibility(View.GONE);
         Toast.makeText(this,"Bad Input Inserted, Please insert again",Toast.LENGTH_SHORT).show();
+        return;
       }
+      intentToOpenService.putExtra("number_for_service", userInputLong);
+      startService(intentToOpenService);
+
+      calcRunning = true;
+      editTextUserInput.setEnabled(false);
+      buttonCalculateRoots.setEnabled(false);
+      progressBar.setVisibility(View.VISIBLE);
     });
 
     // register a broadcast-receiver to handle action "found_roots"
